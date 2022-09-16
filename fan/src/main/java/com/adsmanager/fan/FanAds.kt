@@ -30,7 +30,7 @@ class FanAds : IAds {
         bannerView: RelativeLayout,
         sizeBanner: SizeBanner,
         adUnitId: String,
-        callbackAds: CallbackAds
+        callbackAds: CallbackAds?
     ) {
 
         // Instantiate an AdView object.
@@ -45,11 +45,11 @@ class FanAds : IAds {
         bannerView.addView(adView)
         val adListener = object : AdListener {
             override fun onError(ad: Ad?, error: AdError?) {
-                callbackAds.onAdFailedToLoad("ad: ${ad?.isAdInvalidated}, error: ${error?.errorMessage}")
+                callbackAds?.onAdFailedToLoad("ad: ${ad?.isAdInvalidated}, error: ${error?.errorMessage}")
             }
 
             override fun onAdLoaded(p0: Ad?) {
-
+                callbackAds?.onAdLoaded()
             }
 
             override fun onAdClicked(p0: Ad?) {
@@ -111,24 +111,24 @@ class FanAds : IAds {
         )
     }
 
-    override fun showInterstitial(activity: Activity, adUnitId: String, callbackAds: CallbackAds) {
+    override fun showInterstitial(activity: Activity, adUnitId: String, callbackAds: CallbackAds?) {
         interstitialCallbackAds = callbackAds
         // Check if interstitialAd has been loaded successfully
         if (interstitialAd?.isAdLoaded == false) {
             loadInterstitial(activity, adUnitId)
-            callbackAds.onAdFailedToLoad("Interstitial not ready")
+            callbackAds?.onAdFailedToLoad("Interstitial not ready")
             return
         }
         // Check if ad is already expired or invalidated, and do not show ad if that is the case. You will not get paid to show an invalidated ad.
         if (interstitialAd?.isAdInvalidated == true) {
             loadInterstitial(activity, adUnitId)
-            callbackAds.onAdFailedToLoad("Interstitial not ready")
+            callbackAds?.onAdFailedToLoad("Interstitial not ready")
             return
         }
         // Show the ad
         interstitialAd?.show()
         loadInterstitial(activity, adUnitId)
-        callbackAds.onAdLoaded()
+        callbackAds?.onAdLoaded()
     }
 
 
@@ -137,7 +137,7 @@ class FanAds : IAds {
         nativeView: RelativeLayout,
         sizeNative: SizeNative,
         adUnitId: String,
-        callbackAds: CallbackAds
+        callbackAds: CallbackAds?
     ) {
         when (sizeNative) {
             SizeNative.SMALL -> showSmallNative(activity, adUnitId, callbackAds, nativeView)
@@ -148,23 +148,23 @@ class FanAds : IAds {
     private fun showSmallNative(
         activity: Activity,
         adUnitId: String,
-        callbackAds: CallbackAds,
+        callbackAds: CallbackAds?,
         nativeView: RelativeLayout
     ) {
         val nativeBannerAd = NativeBannerAd(activity, adUnitId)
         val nativeAdListener = object : NativeAdListener {
             override fun onError(ad: Ad?, error: AdError?) {
-                callbackAds.onAdFailedToLoad("ad: ${ad?.isAdInvalidated}, error: ${error?.errorMessage}")
+                callbackAds?.onAdFailedToLoad("ad: ${ad?.isAdInvalidated}, error: ${error?.errorMessage}")
             }
 
             override fun onAdLoaded(ad: Ad) {
-                callbackAds.onAdLoaded()
+                callbackAds?.onAdLoaded()
                 // Race condition, load() called again before last ad was displayed
                 if (nativeBannerAd != ad) {
-                    return;
+                    return
                 }
                 // Inflate Native Banner Ad into Container
-                inflateAdSmall(nativeBannerAd, activity, nativeView);
+                inflateAdSmall(nativeBannerAd, activity, nativeView)
             }
 
             override fun onAdClicked(p0: Ad?) {
@@ -186,24 +186,24 @@ class FanAds : IAds {
             nativeBannerAd.buildLoadAdConfig()
                 .withAdListener(nativeAdListener)
                 .build()
-        );
+        )
 
     }
 
     private fun showMediumNative(
         activity: Activity,
         adUnitId: String,
-        callbackAds: CallbackAds,
+        callbackAds: CallbackAds?,
         nativeView: RelativeLayout
     ) {
         val nativeAd = NativeAd(activity, adUnitId)
         val nativeAdListener = object : NativeAdListener {
             override fun onError(ad: Ad?, error: AdError?) {
-                callbackAds.onAdFailedToLoad("ad: $ad, error: ${error?.errorMessage}")
+                callbackAds?.onAdFailedToLoad("ad: $ad, error: ${error?.errorMessage}")
             }
 
             override fun onAdLoaded(ad: Ad?) {
-                callbackAds.onAdLoaded()
+                callbackAds?.onAdLoaded()
                 if (nativeAd != ad) {
                     return
                 }
@@ -227,7 +227,7 @@ class FanAds : IAds {
             nativeAd.buildLoadAdConfig()
                 .withAdListener(nativeAdListener)
                 .build()
-        );
+        )
     }
 
     private var rewardedVideoAd: RewardedVideoAd? = null
@@ -251,23 +251,24 @@ class FanAds : IAds {
     override fun showRewards(
         activity: Activity,
         adUnitId: String,
-        callbackAds: CallbackAds,
+        callbackAds: CallbackAds?,
         iRewards: IRewards?
     ) {
         this.iRewards = iRewards
         // Check if rewardedVideoAd has been loaded successfully
         if (rewardedVideoAd == null || rewardedVideoAd?.isAdLoaded == false) {
             loadRewards(activity, adUnitId)
-            callbackAds.onAdFailedToLoad("Rewards not ready")
+            callbackAds?.onAdFailedToLoad("Rewards not ready")
             return
         }
         // Check if ad is already expired or invalidated, and do not show ad if that is the case. You will not get paid to show an invalidated ad.
         if (rewardedVideoAd?.isAdInvalidated == true) {
             loadRewards(activity, adUnitId)
-            callbackAds.onAdFailedToLoad("Rewards not ready")
+            callbackAds?.onAdFailedToLoad("Rewards not ready")
             return
         }
         rewardedVideoAd?.show()
+        loadRewards(activity, adUnitId)
     }
 
     private val rewardedVideoAdListener = object : RewardedVideoAdListener {
@@ -329,7 +330,7 @@ class FanAds : IAds {
             adChoicesContainer.addView(adOptionsView, 0)
             val nativeAdTitle: TextView = adView.findViewById(R.id.native_ad_title)
             val nativeAdSocialContext: TextView = adView.findViewById(R.id.native_ad_social_context)
-            val sponsoredLabel: TextView = adView.findViewById(R.id.native_ad_sponsored_label)
+//            val sponsoredLabel: TextView = adView.findViewById(R.id.native_ad_sponsored_label)
             val nativeAdIconView: MediaView = adView.findViewById(R.id.native_icon_view)
             val nativeAdCallToAction: Button = adView.findViewById(R.id.native_ad_call_to_action)
             nativeAdCallToAction.text = nativeBannerAd.adCallToAction
