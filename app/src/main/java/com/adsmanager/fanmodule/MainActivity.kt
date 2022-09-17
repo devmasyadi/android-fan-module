@@ -5,7 +5,13 @@ import android.util.Log
 import android.widget.Button
 import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
-import com.adsmanager.fan.*
+import com.adsmanager.core.CallbackAds
+import com.adsmanager.core.IRewards
+import com.adsmanager.core.RewardsItem
+import com.adsmanager.core.iadsmanager.IInitialize
+import com.adsmanager.core.iadsmanager.SizeBanner
+import com.adsmanager.core.iadsmanager.SizeNative
+import com.adsmanager.fan.FanAds
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,9 +29,12 @@ class MainActivity : AppCompatActivity() {
         fanAds = FanAds()
         fanAds.initialize(
             activity = this,
-            testDevices = listOf("a9e0b1db-61ee-4a3e-8440-134595340d73"),
             iInitialize = object : IInitialize {
                 override fun onInitializationComplete() {
+                    fanAds.setTestDevices(
+                        this@MainActivity,
+                        listOf("6f59a8a3-dde3-4ee8-86f4-a4ed30f4e92d")
+                    )
                     fanAds.loadInterstitial(this@MainActivity, interstitialId)
                     fanAds.loadRewards(this@MainActivity, rewardsId)
                     fanAds.loadGdpr(this@MainActivity, true)

@@ -7,6 +7,12 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import com.adsmanager.core.CallbackAds
+import com.adsmanager.core.IRewards
+import com.adsmanager.core.iadsmanager.IAds
+import com.adsmanager.core.iadsmanager.IInitialize
+import com.adsmanager.core.iadsmanager.SizeBanner
+import com.adsmanager.core.iadsmanager.SizeNative
 import com.facebook.ads.*
 
 
@@ -14,12 +20,15 @@ class FanAds : IAds {
     override fun initialize(
         activity: Activity,
         iInitialize: IInitialize,
-        testDevices: List<String>?
     ) {
         AudienceNetworkAds.initialize(activity)
-        AdSettings.addTestDevices(testDevices)
         iInitialize.onInitializationComplete()
     }
+
+    override fun setTestDevices(activity: Activity, testDevices: List<String>) {
+        AdSettings.addTestDevices(testDevices)
+    }
+
 
     override fun loadGdpr(activity: Activity, childDirected: Boolean) {
 
