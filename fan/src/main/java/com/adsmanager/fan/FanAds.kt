@@ -1,6 +1,7 @@
 package com.adsmanager.fan
 
 import android.app.Activity
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -17,11 +18,9 @@ import com.facebook.ads.*
 
 
 class FanAds : IAds {
-    override fun initialize(
-        activity: Activity,
-        iInitialize: IInitialize,
-    ) {
-        AudienceNetworkAds.initialize(activity)
+
+    override fun initialize(context: Context, iInitialize: IInitialize) {
+        AudienceNetworkAds.initialize(context)
         iInitialize.onInitializationComplete()
     }
 

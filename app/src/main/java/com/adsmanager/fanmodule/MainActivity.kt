@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
         fanAds = FanAds()
         fanAds.initialize(
-            activity = this,
+            this,
             iInitialize = object : IInitialize {
                 override fun onInitializationComplete() {
                     fanAds.setTestDevices(
