@@ -9,23 +9,24 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import com.adsmanager.core.CallbackAds
-import com.adsmanager.core.IRewards
+import com.adsmanager.core.SizeBanner
+import com.adsmanager.core.SizeNative
 import com.adsmanager.core.iadsmanager.IAds
 import com.adsmanager.core.iadsmanager.IInitialize
-import com.adsmanager.core.iadsmanager.SizeBanner
-import com.adsmanager.core.iadsmanager.SizeNative
+import com.adsmanager.core.rewards.IRewards
 import com.facebook.ads.*
 
 
 class FanAds : IAds {
 
-    override fun initialize(context: Context, iInitialize: IInitialize) {
-        AudienceNetworkAds.initialize(context)
-        iInitialize.onInitializationComplete()
-    }
 
     override fun setTestDevices(activity: Activity, testDevices: List<String>) {
         AdSettings.addTestDevices(testDevices)
+    }
+
+    override fun initialize(context: Context, appId: String?, iInitialize: IInitialize?) {
+        AudienceNetworkAds.initialize(context)
+        iInitialize?.onInitializationComplete()
     }
 
 
@@ -150,6 +151,7 @@ class FanAds : IAds {
         when (sizeNative) {
             SizeNative.SMALL -> showSmallNative(activity, adUnitId, callbackAds, nativeView)
             SizeNative.MEDIUM -> showMediumNative(activity, adUnitId, callbackAds, nativeView)
+            SizeNative.SMALL_RECTANGLE -> showSmallNativeRectangle(activity, adUnitId, callbackAds, nativeView)
         }
     }
 
@@ -173,6 +175,51 @@ class FanAds : IAds {
                 }
                 // Inflate Native Banner Ad into Container
                 inflateAdSmall(nativeBannerAd, activity, nativeView)
+            }
+
+            override fun onAdClicked(p0: Ad?) {
+
+            }
+
+            override fun onLoggingImpression(p0: Ad?) {
+
+            }
+
+            override fun onMediaDownloaded(p0: Ad?) {
+
+            }
+
+        }
+
+        // load the ad
+        nativeBannerAd.loadAd(
+            nativeBannerAd.buildLoadAdConfig()
+                .withAdListener(nativeAdListener)
+                .build()
+        )
+
+    }
+
+    private fun showSmallNativeRectangle(
+        activity: Activity,
+        adUnitId: String,
+        callbackAds: CallbackAds?,
+        nativeView: RelativeLayout
+    ) {
+        val nativeBannerAd = NativeBannerAd(activity, adUnitId)
+        val nativeAdListener = object : NativeAdListener {
+            override fun onError(ad: Ad?, error: AdError?) {
+                callbackAds?.onAdFailedToLoad("ad: ${ad?.isAdInvalidated}, error: ${error?.errorMessage}")
+            }
+
+            override fun onAdLoaded(ad: Ad) {
+                callbackAds?.onAdLoaded()
+                // Race condition, load() called again before last ad was displayed
+                if (nativeBannerAd != ad) {
+                    return
+                }
+                // Inflate Native Banner Ad into Container
+                inflateAdSmallRectangle(nativeBannerAd, activity, nativeView)
             }
 
             override fun onAdClicked(p0: Ad?) {
@@ -323,6 +370,54 @@ class FanAds : IAds {
             val inflater = LayoutInflater.from(activity)
             val adView = inflater.inflate(
                 R.layout.fan_small_native,
+                nativeAdLayout,
+                false
+            ) as LinearLayout
+            layNative.removeAllViews()
+            layNative.addView(adView)
+            val adChoicesContainer: RelativeLayout = adView.findViewById(R.id.ad_choices_container)
+            val adOptionsView = AdOptionsView(
+                activity,
+                nativeBannerAd,
+                nativeAdLayout
+            )
+            adChoicesContainer.removeAllViews()
+            adChoicesContainer.addView(adOptionsView, 0)
+            val nativeAdTitle: TextView = adView.findViewById(R.id.native_ad_title)
+            val nativeAdSocialContext: TextView = adView.findViewById(R.id.native_ad_social_context)
+//            val sponsoredLabel: TextView = adView.findViewById(R.id.native_ad_sponsored_label)
+            val nativeAdIconView: MediaView = adView.findViewById(R.id.native_icon_view)
+            val nativeAdCallToAction: Button = adView.findViewById(R.id.native_ad_call_to_action)
+            nativeAdCallToAction.text = nativeBannerAd.adCallToAction
+            nativeAdCallToAction.visibility =
+                if (nativeBannerAd.hasCallToAction()) View.VISIBLE else View.INVISIBLE
+            nativeAdTitle.text = nativeBannerAd.advertiserName
+            nativeAdSocialContext.text = nativeBannerAd.adSocialContext
+//            sponsoredLabel.text = nativeBannerAd.sponsoredTranslation
+            val clickableViews: MutableList<View> = java.util.ArrayList()
+            clickableViews.add(nativeAdTitle)
+            clickableViews.add(nativeAdCallToAction)
+            nativeBannerAd.registerViewForInteraction(
+                adView,
+                nativeAdIconView,
+                clickableViews
+            )
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun inflateAdSmallRectangle(
+        nativeBannerAd: NativeBannerAd,
+        activity: Activity?,
+        layNative: RelativeLayout
+    ) {
+        try {
+            nativeBannerAd.unregisterView()
+            val nativeAdLayout = NativeAdLayout(activity, null, 1)
+            val inflater = LayoutInflater.from(activity)
+            val adView = inflater.inflate(
+                R.layout.fan_small_rectangle_native,
                 nativeAdLayout,
                 false
             ) as LinearLayout

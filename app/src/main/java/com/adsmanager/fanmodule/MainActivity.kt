@@ -6,11 +6,11 @@ import android.widget.Button
 import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.adsmanager.core.CallbackAds
-import com.adsmanager.core.IRewards
-import com.adsmanager.core.RewardsItem
+import com.adsmanager.core.SizeBanner
+import com.adsmanager.core.SizeNative
 import com.adsmanager.core.iadsmanager.IInitialize
-import com.adsmanager.core.iadsmanager.SizeBanner
-import com.adsmanager.core.iadsmanager.SizeNative
+import com.adsmanager.core.rewards.IRewards
+import com.adsmanager.core.rewards.RewardsItem
 import com.adsmanager.fan.FanAds
 
 class MainActivity : AppCompatActivity() {
@@ -29,11 +29,12 @@ class MainActivity : AppCompatActivity() {
         fanAds = FanAds()
         fanAds.initialize(
             this,
+            "",
             iInitialize = object : IInitialize {
                 override fun onInitializationComplete() {
                     fanAds.setTestDevices(
                         this@MainActivity,
-                        listOf("6f59a8a3-dde3-4ee8-86f4-a4ed30f4e92d")
+                        listOf("2a158062-de0b-47a7-bdce-2669f6e03468")
                     )
                     fanAds.loadInterstitial(this@MainActivity, interstitialId)
                     fanAds.loadRewards(this@MainActivity, rewardsId)
@@ -80,6 +81,20 @@ class MainActivity : AppCompatActivity() {
                 this,
                 nativeView,
                 SizeNative.SMALL,
+                nativeSmallId,
+                object : CallbackAds() {
+                    override fun onAdFailedToLoad(error: String?) {
+                        Log.e("HALLO", "native error: $error")
+                    }
+                })
+        }
+
+        findViewById<Button>(R.id.btnSmallNativeRectangle).setOnClickListener {
+            val nativeView = findViewById<RelativeLayout>(R.id.nativeView)
+            fanAds.showNativeAds(
+                this,
+                nativeView,
+                SizeNative.SMALL_RECTANGLE,
                 nativeSmallId,
                 object : CallbackAds() {
                     override fun onAdFailedToLoad(error: String?) {
