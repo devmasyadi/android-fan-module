@@ -39,5 +39,7 @@
     <color name="color_youtube_gray">#F1F1F1</color>
 
     <color name="color_youtube_grayb">#FF9800</color>
+    <color name="native_label_ads_background">#FF9800</color>
+    <color name="native_button_install">#2196F3</color>
 
 </resources>
