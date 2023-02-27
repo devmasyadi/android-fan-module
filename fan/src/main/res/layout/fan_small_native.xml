@@ -109,7 +109,7 @@
                 android:textColor="#ffffff"
                 android:textSize="8sp"
                 android:visibility="visible"
-                app:backgroundTint="#0abde3" />
+                app:backgroundTint="@drawable/round_black" />
 
         </LinearLayout>
 
