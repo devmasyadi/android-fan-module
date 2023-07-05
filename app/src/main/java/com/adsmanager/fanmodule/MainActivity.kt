@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onInitializationComplete() {
                     fanAds.setTestDevices(
                         this@MainActivity,
-                        listOf("d0ea0a1d-d377-4efc-a6f0-35bb15d2393a")
+                        listOf("2c8952cc-0ab2-4752-b480-09ac53f7b5a4")
                     )
                     fanAds.loadInterstitial(this@MainActivity, interstitialId)
                     fanAds.loadRewards(this@MainActivity, rewardsId)
